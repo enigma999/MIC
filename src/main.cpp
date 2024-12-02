@@ -50,16 +50,13 @@ enum bstate button_state(void)
   {
     delay(DEBOUNCETIME);
   }
-  previousButtonState = button_state();
+  previousButtonState = currentState;
   return currentState;
 }
 
 bool vehicle_passed(void)
 {
   bstate state = button_state();
-
-  Serial.print(state);
-
   bool returnValue = false;
   if(state == pressed)
   {
@@ -82,7 +79,7 @@ int main()
 
   while (true)
   {
-    if(true)
+    if(vehicle_passed())
     {
       if(counterValue < 15)
         {
@@ -92,8 +89,8 @@ int main()
           counterValue = COUNTERSTARTVALUE;
         }
       }
-      delay(1000);
       display_counter(counterValue);
+      Serial.println(counterValue);
   }
   return 0;
 }
