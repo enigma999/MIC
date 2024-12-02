@@ -1,10 +1,5 @@
 #include <Arduino.h>
 
-#define LEDPINSIO 0x0F
-#define ButtonPinIO 0x00
-#define BUTTONPIN 0x04
-
-
 #define DEBOUNCETIME 50
 #define COUNTERRESTARTVALUE 0
 #define MAXCOUNTERVALUE 15
@@ -15,7 +10,7 @@ enum bstate
   released
 };
 
-int previousButtonState;
+int previousButtonState = released;
 uint8_t counterValue = COUNTERRESTARTVALUE;
 bool hasBeenPressed = false;
 
@@ -24,14 +19,14 @@ void display_counter(uint8_t counter)
   PORTC = counter;
 }
 
+
 void init_pins(){
+  //initialize pins for LED's
   DDRC = (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3);
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
-
+  //initialize pins for BUTTON
   DDRD |= (1 << DDD2);
   PORTD |= (1 << PORTD2);
-  
-  previousButtonState = released;
 }
 
 enum bstate readButton(void)
