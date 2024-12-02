@@ -1,6 +1,12 @@
 #include <Arduino.h>
 #define BAUDRATE 9600
+
+#define LedPinsIO 0x0F
+#define ButtonPinIO 0x00
+
+
 #define DEBOUNCETIME 50
+#define COUNTERSTARTVALUE 0
 
 enum bstate
 {
@@ -9,18 +15,21 @@ enum bstate
 };
 
 int previousButtonState;
+uint8_t counter = COUNTERSTARTVALUE;
 
 void display_counter(uint8_t counter)
 {
   PORTC = counter;
 }
 
-void initialize()
+void init_pins()
 {
-  DDRC = 0x0f;
+  DDRC = LedPinsIO;
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
-  DDRD = 0x00;
+
+  DDRD = ButtonPinIO;
   PORTD |= (1 << PORTD2);
+  
   previousButtonState = released;
 }
 
@@ -45,27 +54,33 @@ enum bstate button_state(void)
 
 bool vehicle_passed(void)
 {
-  bstate currentButtonState = button_state();
-  if (currentButtonState == released && previousButtonState == pressed)
+  bstate currentButtonState = button_state(); //get current state
+  if (currentButtonState == released && previousButtonState == pressed) //if the button has been pushed return true
   {
-    // increment;
+    return true;
   }
   previousButtonState = currentButtonState;
+  return false;
 }
 
 int main()
 {
   // initialize
-  initialize();
+  init_pins();
   while (true)
   {
     previousButtonState = button_state();
-    // check vehicle passed
-    // increment counter
-
-    // check counter overflow
-    // reset counter
-
-    // display counter
+    
+    if(vehicle_passed)
+    {
+      if(counter < 15)
+      {
+        counter++;
+      }else
+      {
+        counter = COUNTERSTARTVALUE;
+      }
+    }
+    display_counter(0x02);
   }
 }
