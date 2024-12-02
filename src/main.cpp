@@ -24,9 +24,8 @@ void display_counter(uint8_t counter)
   PORTC = counter;
 }
 
-void init_pins()
-{
-  DDRC = LedPinsIO;
+void init_pins(){
+  DDRC = (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3);
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
 
   DDRD |= (1 << DDD2);
@@ -37,7 +36,7 @@ void init_pins()
 
 enum bstate readButton(void)
 {
-  if (!((PIND & 0b00000100) == 0b0000100))
+  if (!(PIND & (1<< PIND2)))
   {
     return pressed;
   }
