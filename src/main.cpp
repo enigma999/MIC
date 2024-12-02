@@ -1,12 +1,13 @@
 #include <Arduino.h>
-#define BAUDRATE 9600
 
-#define LedPinsIO 0x0F
+#define LEDPINSIO 0x0F
 #define ButtonPinIO 0x00
+#define BUTTONPIN 0x04
 
 
 #define DEBOUNCETIME 50
-#define COUNTERSTARTVALUE 0
+#define COUNTERRESTARTVALUE 0
+#define MAXCOUNTERVALUE 15
 
 enum bstate
 {
@@ -15,7 +16,7 @@ enum bstate
 };
 
 int previousButtonState;
-uint8_t counterValue = COUNTERSTARTVALUE;
+uint8_t counterValue = COUNTERRESTARTVALUE;
 bool hasBeenPressed = false;
 
 void display_counter(uint8_t counter)
@@ -25,7 +26,7 @@ void display_counter(uint8_t counter)
 
 void init_pins()
 {
-  DDRC = LedPinsIO;
+  DDRC = LEDPINSIO;
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
 
   DDRD = ButtonPinIO;
@@ -36,7 +37,7 @@ void init_pins()
 
 enum bstate readButton(void)
 {
-  if (!((PIND & 0b00000100) == 0b0000100))
+  if (!((PIND & BUTTONPIN) == BUTTONPIN))
   {
     return pressed;
   }
@@ -71,26 +72,22 @@ bool vehicle_passed(void)
 int main()
 {
   init();
-  sei();
-
   // initialize
   init_pins();
-  Serial.begin(9600);
 
   while (true)
   {
     if(vehicle_passed())
     {
-      if(counterValue < 15)
+      if(counterValue < MAXCOUNTERVALUE)
         {
           counterValue++;
         }else
         {
-          counterValue = COUNTERSTARTVALUE;
+          counterValue = COUNTERRESTARTVALUE;
         }
       }
       display_counter(counterValue);
-      Serial.println(counterValue);
   }
   return 0;
 }
