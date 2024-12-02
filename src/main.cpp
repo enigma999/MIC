@@ -94,20 +94,6 @@ int main()
       }
       delay(1000);
       display_counter(counterValue);
-      Serial.print(counterValue);
-    //previousButtonState = button_state();
-  //   if(vehicle_passed() == false)
-  //   {
-  //     if(counter < 15)
-  //     {
-  //       counter++;
-  //     }else
-  //     {
-  //       counter = COUNTERSTARTVALUE;
-  //     }
-  //   }
-  //   display_counter(counter);
   }
-
   return 0;
 }
