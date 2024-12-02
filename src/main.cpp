@@ -16,6 +16,7 @@ enum bstate
 
 int previousButtonState;
 uint8_t counter = COUNTERSTARTVALUE;
+bool hasBeenPressed = false;
 
 void display_counter(uint8_t counter)
 {
@@ -49,17 +50,22 @@ enum bstate button_state(void)
   {
     delay(DEBOUNCETIME);
   }
+  previousButtonState = button_state;
   return currentState;
 }
 
 bool vehicle_passed(void)
 {
-  bstate state = button_state();                 //polling van de button
-  if(state == released){ 
-                                               //returned alleen true als de knop wordt losgelaten
-    return true;
+  bstate state = button_state();
+  bool returnValue = false;
+  if(state == pressed)
+  {
+    hasBeenPressed = true;
+  }else if(hasBeenPressed == true){
+    returnValue = true;
+    hasBeenPressed = false;
   }
-  return false; 
+  return returnValue;
 }
 
 int main()
