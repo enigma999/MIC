@@ -8,7 +8,7 @@ enum bstate
   released
 };
 
-int prevButtonState;
+int previousButtonState;
 
 void display_counter(uint8_t counter)
 {
@@ -21,7 +21,7 @@ void init()
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
   DDRD = 0x00;
   PORTD |= (1 << PORTD2);
-  prevButtonState = released;
+  previousButtonState = released;
 }
 
 enum bstate readButton(void)
@@ -36,20 +36,29 @@ enum bstate readButton(void)
 enum bstate button_state(void)
 {
   enum bstate currentState = readButton();
-  if (currentState != prevButtonState)
+  if (currentState != previousButtonState)
   {
     delay(DEBOUNCETIME);
   }
-  // als anders wachten
   return currentState;
 }
+
+  bool vehicle_passed(void)
+  {
+    bstate currentButtonState = button_state();
+    if(currentButtonState == released && previousButtonState == pressed)
+    {
+      //increment;
+    }
+    previousButtonState = currentButtonState;
+  }
 
 int main()
 {
   //initialize
   init();
   while(true){
-  prevButtonState = button_state()
+  previousButtonState = button_state()
   //check vehicle passed
      //increment counter
  
