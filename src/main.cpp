@@ -15,7 +15,7 @@ enum bstate
 };
 
 int previousButtonState;
-uint8_t counter = COUNTERSTARTVALUE;
+uint8_t counterValue = COUNTERSTARTVALUE;
 bool hasBeenPressed = false;
 
 void display_counter(uint8_t counter)
@@ -50,13 +50,16 @@ enum bstate button_state(void)
   {
     delay(DEBOUNCETIME);
   }
-  previousButtonState = button_state;
+  previousButtonState = button_state();
   return currentState;
 }
 
 bool vehicle_passed(void)
 {
   bstate state = button_state();
+
+  Serial.print(state);
+
   bool returnValue = false;
   if(state == pressed)
   {
@@ -70,24 +73,41 @@ bool vehicle_passed(void)
 
 int main()
 {
+  init();
+  sei();
+
   // initialize
   init_pins();
   Serial.begin(9600);
+
   while (true)
   {
-    //previousButtonState = button_state();
-    Serial.println(counter);
-    if(!vehicle_passed)
+    if(true)
     {
-      if(counter < 15)
-      {
-        counter++;
-      }else
-      {
-        counter = COUNTERSTARTVALUE;
+      if(counterValue < 15)
+        {
+          counterValue++;
+        }else
+        {
+          counterValue = COUNTERSTARTVALUE;
+        }
       }
-    }
-    display_counter(counter);
+      delay(1000);
+      display_counter(counterValue);
+      Serial.print(counterValue);
+    //previousButtonState = button_state();
+  //   if(vehicle_passed() == false)
+  //   {
+  //     if(counter < 15)
+  //     {
+  //       counter++;
+  //     }else
+  //     {
+  //       counter = COUNTERSTARTVALUE;
+  //     }
+  //   }
+  //   display_counter(counter);
   }
+
   return 0;
 }
