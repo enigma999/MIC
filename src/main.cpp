@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #define BAUDRATE 9600
+#define DEBOUNCETIME 50
 
 enum bstate
 {
   pressed,
   released
 };
+
+int prevButtonState;
 
 void display_counter(uint8_t counter)
 {
@@ -18,29 +21,44 @@ void init()
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
   DDRD = 0x00;
   PORTD |= (1 << PORTD2);
+  prevButtonState = released;
 }
 
-bool readButton()
+enum bstate readButton(void)
 {
-  return !((PIND & 0b00000100) == 0b0000100);
+  if (!((PIND & 0b00000100) == 0b0000100))
+  {
+    return pressed;
+  }
+  return released;
 }
 
 enum bstate button_state(void)
 {
+  enum bstate currentState = readButton();
+  if (currentState != prevButtonState)
+  {
+    delay(DEBOUNCETIME);
+  }
+  // als anders wachten
+  return currentState;
 }
 
 int main()
 {
+  //initialize
   init();
-  while (true)
-  {
-    if (readButton())
-    {
-      display_counter(0b00001111);
-    }
-    else
-    {
-      display_counter(0b00000000);
-    }
+  while(true){
+  prevButtonState = button_state()
+  //check vehicle passed
+     //increment counter
+ 
+
+  //check counter overflow
+    //reset counter
+  
+  //display counter
   }
+ 
+
 }
