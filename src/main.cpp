@@ -43,31 +43,29 @@ enum bstate button_state(void)
   return currentState;
 }
 
-  bool vehicle_passed(void)
+bool vehicle_passed(void)
+{
+  bstate currentButtonState = button_state();
+  if (currentButtonState == released && previousButtonState == pressed)
   {
-    bstate currentButtonState = button_state();
-    if(currentButtonState == released && previousButtonState == pressed)
-    {
-      //increment;
-    }
-    previousButtonState = currentButtonState;
+    // increment;
   }
+  previousButtonState = currentButtonState;
+}
 
 int main()
 {
-  //initialize
+  // initialize
   initialize();
-  while(true){
-  previousButtonState = button_state();
-  //check vehicle passed
-     //increment counter
- 
+  while (true)
+  {
+    previousButtonState = button_state();
+    // check vehicle passed
+    // increment counter
 
-  //check counter overflow
-    //reset counter
-  
-  //display counter
+    // check counter overflow
+    // reset counter
+
+    // display counter
   }
- 
-
 }
