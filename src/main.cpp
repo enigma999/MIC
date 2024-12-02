@@ -54,24 +54,24 @@ enum bstate button_state(void)
 
 bool vehicle_passed(void)
 {
-  bstate currentButtonState = button_state(); //get current state
-  if (currentButtonState == released && previousButtonState == pressed) //if the button has been pushed return true
-  {
+  bstate state = button_state();                 //polling van de button
+  if(state == released){ 
+                                               //returned alleen true als de knop wordt losgelaten
     return true;
   }
-  previousButtonState = currentButtonState;
-  return false;
+  return false; 
 }
 
 int main()
 {
   // initialize
   init_pins();
+  Serial.begin(9600);
   while (true)
   {
-    previousButtonState = button_state();
-    
-    if(vehicle_passed)
+    //previousButtonState = button_state();
+    Serial.println(counter);
+    if(!vehicle_passed)
     {
       if(counter < 15)
       {
@@ -81,6 +81,7 @@ int main()
         counter = COUNTERSTARTVALUE;
       }
     }
-    display_counter(0x02);
+    display_counter(counter);
   }
+  return 0;
 }
