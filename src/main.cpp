@@ -15,7 +15,7 @@ void display_counter(uint8_t counter)
   PORTC = counter;
 }
 
-void init()
+void initialize()
 {
   DDRC = 0x0f;
   PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
@@ -56,9 +56,9 @@ enum bstate button_state(void)
 int main()
 {
   //initialize
-  init();
+  initialize();
   while(true){
-  previousButtonState = button_state()
+  previousButtonState = button_state();
   //check vehicle passed
      //increment counter
  
