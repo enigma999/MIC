@@ -103,22 +103,14 @@ void debounce15ms() {
 }
 
 ISR(TIMER0_COMPA_vect) {
-  previousButtonState = buttonState; // Update previous state
-
-  if (PIND & (1 << PD2)) {
-    buttonState = BUTTON_RELEASED; // Button is released
-  } else {
-    buttonState = BUTTON_PRESSED; // Button is pressed
-  }
-
   sei(); // Re-enable interrupts after debounce period
   TCCR0B &= ~((1 << CS01) | (1 << CS00)); // Stop Timer 0
 }
 
 ISR(PCINT2_vect) { // Interrupt for button press/release
-  if ((PIND & (1 << PD2)) && (buttonState == previousButtonState)) {
+  if (PIND & (1 << PD2))  {
     buttonStateCheck = BUTTON_RELEASED; // Button is released, update state for main loop
-  } else if (buttonState == previousButtonState) {
+  } else {
     centibeatCount = COUNTER_MINIMUM; // Reset centibeat count when button is pressed
     buttonStateCheck = BUTTON_PRESSED; // Button is pressed, update state for main loop
   }
