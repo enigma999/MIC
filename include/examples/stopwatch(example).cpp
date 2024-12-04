@@ -89,22 +89,10 @@ void setupTimer0_15ms() {
   sei(); // Enable global interrupts
 }
 
-void debounce15ms() {
-  cli(); // Disable all interrupts
-
-  if (PIND & (1 << PD2)) {
-    buttonState = BUTTON_RELEASED; // Button is released
-  } else {
-    buttonState = BUTTON_PRESSED; // Button is pressed
-  }
-
-  TCNT0 = 0; // Reset Timer 0 counter
-  TCCR0B |= (1 << CS01) | (1 << CS00); // Start Timer 0 with prescaler 64
-}
-
 ISR(TIMER0_COMPA_vect) {
   sei(); // Re-enable interrupts after debounce period
   TCCR0B &= ~((1 << CS01) | (1 << CS00)); // Stop Timer 0
+  TCNT0 = 0; // Reset Timer 0 counter
 }
 
 ISR(PCINT2_vect) { // Interrupt for button press/release
@@ -114,7 +102,8 @@ ISR(PCINT2_vect) { // Interrupt for button press/release
     centibeatCount = COUNTER_MINIMUM; // Reset centibeat count when button is pressed
     buttonStateCheck = BUTTON_PRESSED; // Button is pressed, update state for main loop
   }
-  debounce15ms(); // Start debounce timer
+  
+  TCCR0B |= (1 << CS01) | (1 << CS00); // Start Timer 0 with prescaler 64
 }
 
 ISR(TIMER1_COMPA_vect) {
