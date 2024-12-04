@@ -68,6 +68,7 @@ volatile ButtonStates buttonStateCheck = BUTTON_RELEASED;  // Button state check
 
 void displayCentibeats(uint8_t centibeats) {
   Wire.beginTransmission(ADDRESS); // Start transmission to PCF8574
+  
   Wire.write(~(CONFIGURATION[centibeats])); // Send the correct display configuration
   Wire.endTransmission(); // End transmission
 }
@@ -89,21 +90,40 @@ void setupTimer0_15ms() {
   sei(); // Enable global interrupts
 }
 
+void debounce15ms() {
+  cli(); // Disable all interrupts
+
+  if (PIND & (1 << PD2)) {
+    buttonState = BUTTON_RELEASED; // Button is released
+  } else {
+    buttonState = BUTTON_PRESSED; // Button is pressed
+  }
+
+  TCNT0 = 0; // Reset Timer 0 counter
+  TCCR0B |= (1 << CS01) | (1 << CS00); // Start Timer 0 with prescaler 64
+}
+
 ISR(TIMER0_COMPA_vect) {
+  previousButtonState = buttonState; // Update previous state
+
+  if (PIND & (1 << PD2)) {
+    buttonState = BUTTON_RELEASED; // Button is released
+  } else {
+    buttonState = BUTTON_PRESSED; // Button is pressed
+  }
+
   sei(); // Re-enable interrupts after debounce period
   TCCR0B &= ~((1 << CS01) | (1 << CS00)); // Stop Timer 0
-  TCNT0 = 0; // Reset Timer 0 counter
 }
 
 ISR(PCINT2_vect) { // Interrupt for button press/release
-  if (PIND & (1 << PD2))  {
+  if ((PIND & (1 << PD2)) && (buttonState == previousButtonState)) {
     buttonStateCheck = BUTTON_RELEASED; // Button is released, update state for main loop
-  } else {
+  } else if (buttonState == previousButtonState) {
     centibeatCount = COUNTER_MINIMUM; // Reset centibeat count when button is pressed
     buttonStateCheck = BUTTON_PRESSED; // Button is pressed, update state for main loop
   }
-  
-  TCCR0B |= (1 << CS01) | (1 << CS00); // Start Timer 0 with prescaler 64
+  debounce15ms(); // Start debounce timer
 }
 
 ISR(TIMER1_COMPA_vect) {
