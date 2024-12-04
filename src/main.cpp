@@ -1,9 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#define RESET 0
+#define TIMERRESET 0
+#define SEGMENTADDRESS 0x21
+#define MINCENTIBEATS 0
+#define MAXCENTIBEATS 15
 
-
+#define TIMER0COMPARE 234
+#define TIMER1COMPARE 53999
 enum bstate
 {
     pressed,
@@ -13,12 +17,12 @@ enum bstate
 const uint8_t segmentValues[16] = {
   0xBF, //0
   0x86, //1
-  0xBB, //2
-  0xAF, //3
+  0xDB, //2
+  0xCF, //3
   0xE6, //4
   0xED, //5
   0xFD, //6
-  0x17, //7
+  0x87, //7
   0xFF, //8
   0xEF, //9
   0xF7, //A
@@ -30,7 +34,7 @@ const uint8_t segmentValues[16] = {
 };
 
 bstate buttonState = released; // default is released.
-uint8_t volatile amountOfCentibeats = 0;
+uint8_t volatile amountOfCentibeats = MINCENTIBEATS;
 
 void initPins(void){
   PORTC |= (1 << PORT1) | (1 << PORT4) | (1 << PORT5);
@@ -43,16 +47,16 @@ void initTimers(void)
 {
   //timer 0
   TCCR0A |= (1 << WGM01);
-  OCR0A = 0000;
+  OCR0A = TIMER0COMPARE;
   TCCR0B |= (1 << CS01) | (1 << CS00);
   TIMSK0 |= (1 << OCIE0A);
-  TCNT0 = 0;
+  TCNT0 = TIMERRESET;
 
   //timer 1
   TCCR1A |= (1 << COM1A0);
-  OCR1A = 00000000000000000000;
+  OCR1A = TIMER1COMPARE;
   TIMSK1 |= (1 << OCIE1A);
-  TCNT1 = 0;
+  TCNT1 = TIMERRESET;
 }
 
 void setup()
@@ -65,7 +69,7 @@ void setup()
 
 void displayCentibeats(uint8_t centibeats)
 {
-  Wire.beginTransmission(0x21);
+  Wire.beginTransmission(SEGMENTADDRESS);
   Wire.write(~(segmentValues[centibeats]));
   Wire.endTransmission();
 }
@@ -75,47 +79,38 @@ ISR(PCINT2_vect)
 {
     if (!(PIND & (1 << PIND2))) //
     {
-        amountOfCentibeats = RESET;      
+        amountOfCentibeats = MINCENTIBEATS;      
         buttonState = pressed;
     }
     else
     {
         buttonState = released;
     }
-    TCCR0B |= (1 << CS01) | (1 << CS00);
+    TCCR0B |= (1 << CS01) | (1 << CS00); //start timer 0
 }
 
 // ISR timer 0 voor debounce
 ISR(TIMER0_COMPA_vect)
 {
     sei(); 
-    TCCR0B &= ~((1 << CS01) | (1 << CS00)); //stop timer
+    TCCR0B &= ~((1 << CS01) | (1 << CS00)); //stop timer 0
     cli();
-    TCNT0 = RESET;
+    TCNT0 = TIMERRESET;
 }
 // ISR timer 1 voor tellen
 ISR(TIMER1_COMPA_vect)
 {
-  if(amountOfCentibeats >= 15) //Timer overflow check
+  if(amountOfCentibeats >= MAXCENTIBEATS) //Timer overflow check
   {
-    amountOfCentibeats = 0;
+    amountOfCentibeats = MINCENTIBEATS;
   }else{
     ++amountOfCentibeats;
   }
-
 }
 
-void resetCounter()
-{
-}
-
-void display()
-{
-}
 int main()
 {
     setup();
-
     while (true)
     {
         if (buttonState == pressed)
@@ -126,17 +121,7 @@ int main()
         {
             TCCR1B &= ~((1 << CS12));
         }
-        //displayCentibeats(amountOfCentibeats) ; 
-
-        if((int)displayCentibeats % 2 == 0){
-          TCCR1B |= (1 << CS12) | (1 << WGM12);
-          Wire.beginTransmission(0x21);
-          Wire.write(~(segmentValues[5]));
-          Wire.endTransmission();
-        }else{
-          Wire.beginTransmission(0x21);
-          Wire.write(~(segmentValues[1]));
-          Wire.endTransmission();
-        }
+        displayCentibeats(amountOfCentibeats) ; 
     }
+    return 0;
 }
