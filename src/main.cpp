@@ -1,87 +1,77 @@
 #include <Arduino.h>
 
-#define DEBOUNCETIME 50
-#define COUNTERRESTARTVALUE 0
-#define MAXCOUNTERVALUE 15
-
 enum bstate
 {
-  pressed,
-  released
+    pressed,
+    released
 };
 
-int previousButtonState = released;
-uint8_t counterValue = COUNTERRESTARTVALUE;
-bool hasBeenPressed = false;
+bstate buttonState = released; // default is released.
 
-void display_counter(uint8_t counter)
+void setup()
 {
-  PORTC = counter;
+    // pins
+    DDRB |= (1 << DDB1);
+    PORTB |= (1 << PORTB1);
+    PORTC |= (1 << PORT1) | (1 << PORT4) | (1 << PORT5);
+    PORTD |= (1 << PORT2);                               
+    PCICR |= (1 << PCIE2);                              
+    PCMSK2 |= (1 << PCINT18);                            
+    // timer
+    // interupt
+    sei();
 }
 
-
-void init_pins(){
-  //initialize pins for LED's
-  DDRC = (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3);
-  PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
-  //initialize pins for BUTTON
-  DDRD |= (1 << DDD2);
-  PORTD |= (1 << PORTD2);
-}
-
-enum bstate readButton(void)
+// ISR
+ISR(PCINT2_vect)
 {
-  if (!(PIND & (1<< PIND2)))
-  {
-    return pressed;
-  }
-  return released;
+    if (!(PIND & (1 << PIND2))) //
+    {
+        buttonState = pressed;
+    }
+    else
+    {
+        buttonState = released;
+    }
 }
 
-enum bstate button_state(void)
+// ISR timer 0 voor debounce
+ISR(TIMER0_COMPA_vect)
 {
-  enum bstate currentState = readButton();
-  if (currentState != previousButtonState)
-  {
-    delay(DEBOUNCETIME);
-  }
-  previousButtonState = currentState;
-  return currentState;
 }
-
-bool vehicle_passed(void)
+// ISR timer 1 voor tellen
+ISR(TIMER1_COMPA_vect)
 {
-  bstate state = button_state();
-  bool returnValue = false;
-  if(state == pressed)
-  {
-    hasBeenPressed = true;
-  }else if(hasBeenPressed == true){
-    returnValue = true;
-    hasBeenPressed = false;
-  }
-  return returnValue;
 }
 
+void startTimer()
+{
+}
+
+void stopTimer()
+{
+}
+
+void resetCounter()
+{
+}
+
+void display()
+{
+}
 int main()
 {
-  init();
-  // initialize
-  init_pins();
+    setup();
 
-  while (true)
-  {
-    if(vehicle_passed())
+    while (true)
     {
-      if(counterValue < MAXCOUNTERVALUE)
+        if (buttonState == pressed)
         {
-          counterValue++;
-        }else
-        {
-          counterValue = COUNTERRESTARTVALUE;
+            PORTB = (1 << PORTB1);
         }
-      }
-      display_counter(counterValue);
-  }
-  return 0;
+        else
+        {
+            PORTB = 0 & (1 << PORTB1);
+        }
+    }
 }
