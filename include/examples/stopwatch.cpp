@@ -34,7 +34,7 @@ const uint8_t segmentValues[16] = {
 };
 
 bstate buttonState = released; // default is released.
-uint8_t volatile amountOfCentibeats = MINCENTIBEATS;
+uint8_t volatile amountOfCentibeats = MINCENTIBEATS; //default is 0
 
 void initPins(void){
   PORTC |= (1 << PORT1) | (1 << PORT4) | (1 << PORT5);

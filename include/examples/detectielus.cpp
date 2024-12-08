@@ -63,25 +63,24 @@ bool vehicle_passed(void)
   return returnValue;
 }
 
-// int main()
-// {
-//   init();
-//   // initialize
-//   init_pins();
+int main()
+{
+  init();
+  init_pins();
 
-//   while (true)
-//   {
-//     if(vehicle_passed())
-//     {
-//       if(counterValue < MAXCOUNTERVALUE)
-//         {
-//           counterValue++;
-//         }else
-//         {
-//           counterValue = COUNTERRESTARTVALUE;
-//         }
-//       }
-//       display_counter(counterValue);
-//   }
-//   return 0;
-// }
+  while (true)
+  {
+    if(vehicle_passed())
+    {
+      if(counterValue < MAXCOUNTERVALUE)
+        {
+          counterValue++;
+        }else
+        {
+          counterValue = COUNTERRESTARTVALUE;
+        }
+      }
+      display_counter(counterValue);
+  }
+  return 0;
+}
