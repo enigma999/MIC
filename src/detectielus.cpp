@@ -19,19 +19,16 @@ void display_counter(uint8_t counter)
   PORTC = counter;
 }
 
-
-void init_pins(){
-  //initialize pins for LED's
-  DDRC = (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3);
-  PORTC |= (1 << PORTC0) | (1 << PORTC1) | (1 << PORTC2) | (1 << PORTC3);
-  //initialize pins for BUTTON
-  DDRD |= (1 << DDD2);
-  PORTD |= (1 << PORTD2);
+void init_pins()
+{
+  DDRC = (1 << DDC0) | (1 << DDC1) | (1 << DDC2) | (1 << DDC3);           // set LED pins to output // initialize pins for BUTTON
+  DDRD &= ~(1 << DDD2);// set Button pin to read
+  PORTD |= (1 << PORTD2); // set button pin to pullup
 }
 
 enum bstate readButton(void)
 {
-  if (!(PIND & (1<< PIND2)))
+  if (!(PIND & (1 << PIND2)))
   {
     return pressed;
   }
@@ -53,35 +50,37 @@ bool vehicle_passed(void)
 {
   bstate state = button_state();
   bool returnValue = false;
-  if(state == pressed)
+  if (state == pressed)
   {
     hasBeenPressed = true;
-  }else if(hasBeenPressed == true){
+  }
+  else if (hasBeenPressed == true)
+  {
     returnValue = true;
     hasBeenPressed = false;
   }
   return returnValue;
 }
 
-// int main()
-// {
-//   init();
-//   // initialize
-//   init_pins();
+int main()
+{
+  init();
+  // initialize
+  init_pins();
 
-//   while (true)
-//   {
-//     if(vehicle_passed())
-//     {
-//       if(counterValue < MAXCOUNTERVALUE)
-//         {
-//           counterValue++;
-//         }else
-//         {
-//           counterValue = COUNTERRESTARTVALUE;
-//         }
-//       }
-//       display_counter(counterValue);
-//   }
-//   return 0;
-// }
+  while (true)
+  {
+    if(vehicle_passed())
+    {
+      if(counterValue < MAXCOUNTERVALUE)
+        {
+          counterValue++;
+        }else
+        {
+          counterValue = COUNTERRESTARTVALUE;
+        }
+      }
+      display_counter(counterValue);
+  }
+  return 0;
+}

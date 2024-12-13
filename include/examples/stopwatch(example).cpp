@@ -68,7 +68,6 @@ volatile ButtonStates buttonStateCheck = BUTTON_RELEASED;  // Button state check
 
 void displayCentibeats(uint8_t centibeats) {
   Wire.beginTransmission(ADDRESS); // Start transmission to PCF8574
-  
   Wire.write(~(CONFIGURATION[centibeats])); // Send the correct display configuration
   Wire.endTransmission(); // End transmission
 }
